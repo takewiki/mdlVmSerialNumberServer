@@ -3,15 +3,16 @@
 #'
 #' @param input 输入
 #' @param output 输出
+#' @param app_id
+#' @param run_env
 #' @param session 会话
-#' @param dms_token 口令
 #'
 #' @return 返回值
 #' @export
 #'
 #' @examples
 #' SerialNumberSelectServer()
-SerialNumberSelectServer <- function(input,output,session,dms_token,erp_token) {
+SerialNumberSelectServer <- function(input,output,session, app_id, run_env = "PRD") {
   #获取参数
   text_SerialNumber=tsui::var_text('text_SerialNumber')
 
@@ -29,6 +30,7 @@ SerialNumberSelectServer <- function(input,output,session,dms_token,erp_token) {
 
 
     }else{
+      erp_token = rdbepkg::dbConfig(FAppId = app_id, FType = "ERP", FRunEnv = run_env)
       data = mdlVmSerialNumberPkg::SerialNumber_select(erp_token = erp_token,FSerialNumber =FSerialNumber )
       tsui::run_dataTable2(id ='SerialNumber_resultView' ,data =data )
 
@@ -49,16 +51,17 @@ SerialNumberSelectServer <- function(input,output,session,dms_token,erp_token) {
 #'
 #' @param input 输入
 #' @param output 输出
+#' @param app_id
+#' @param run_env
 #' @param session 会话
-#' @param dms_token 口令
 #'
 #' @return 返回值
 #' @export
 #'
 #' @examples
 #' SerialNumberServer()
-SerialNumberServer <- function(input,output,session,dms_token,erp_token) {
-  SerialNumberSelectServer(input = input,output = output,session = session,dms_token = dms_token,erp_token=erp_token)
+SerialNumberServer <- function(input,output,session, app_id, run_env = "PRD") {
+  SerialNumberSelectServer(input = input,output = output,session = session,app_id=app_id, run_env = run_env)
 
 
 }
