@@ -4,7 +4,7 @@
 \alias{SerialNumberServer}
 \title{处理逻辑}
 \usage{
-SerialNumberServer(input, output, session, dms_token)
+SerialNumberServer(input, output, session, dms_token, erp_token)
 }
 \arguments{
 \item{input}{输入}

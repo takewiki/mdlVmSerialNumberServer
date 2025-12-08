@@ -11,7 +11,7 @@
 #'
 #' @examples
 #' SerialNumberSelectServer()
-SerialNumberSelectServer <- function(input,output,session,dms_token) {
+SerialNumberSelectServer <- function(input,output,session,dms_token,erp_token) {
   #获取参数
   text_SerialNumber=tsui::var_text('text_SerialNumber')
 
@@ -29,8 +29,7 @@ SerialNumberSelectServer <- function(input,output,session,dms_token) {
 
 
     }else{
-      data = mdlVmSerialNumberr::SerialNumber_selectByDate(dms_token = dms_token,FCalculateYear = FCalculateYear,FLatestVersion =FLatestVersion ,FVersion = FVersion,FCalculationPeriod = FCalculationPeriod)
-
+      data = mdlVmSerialNumberPkg::SerialNumber_select(erp_token = erp_token,FSerialNumber =FSerialNumber )
       tsui::run_dataTable2(id ='SerialNumber_resultView' ,data =data )
 
       tsui::run_download_xlsx(id = 'dl_SerialNumber',data = data,filename = 'SerialNumber.xlsx')
@@ -58,8 +57,10 @@ SerialNumberSelectServer <- function(input,output,session,dms_token) {
 #'
 #' @examples
 #' SerialNumberServer()
-SerialNumberServer <- function(input,output,session,dms_token) {
-  SerialNumberSelectServer(input = input,output = output,session = session,dms_token = dms_token)
+SerialNumberServer <- function(input,output,session,dms_token,erp_token) {
+  SerialNumberSelectServer(input = input,output = output,session = session,dms_token = dms_token,erp_token=erp_token)
 
 
 }
+
+
