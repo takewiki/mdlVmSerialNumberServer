@@ -98,11 +98,20 @@ SerialNumberSelectServer <- function(input,output,session, app_id, run_env = "PR
 
 
   #查询按钮
+  # 显示选择信息
+  output$SerialNumberselection_info <- renderPrint({
+    selected <- input$SerialNumber_column_selector
+    cat("Column Count: ", length(selected), "\n")
+    cat("Column List: ", paste(selected, collapse = ", "), "\n")
+    FSerialNumber=text_SerialNumber()
+    cat("Serial Number:",FSerialNumber)
+  })
 
   shiny::observeEvent(input$btn_SerialNumber_view,{
 
     #req(SerialNumber_filtered_data())
     #req(input$SerialNumber_column_selector)
+    FSerialNumber=text_SerialNumber()
 
 
     if(FSerialNumber==''){
@@ -111,7 +120,7 @@ SerialNumberSelectServer <- function(input,output,session, app_id, run_env = "PR
 
 
     }else{
-      FSerialNumber=text_SerialNumber()
+
       erp_token = rdbepkg::dbConfig(FAppId = app_id, FType = "ERP", FRunEnv = run_env)
       data = mdlVmSerialNumberPkg::SerialNumber_select(erp_token = erp_token,FSerialNumber =FSerialNumber )
       print(data)
