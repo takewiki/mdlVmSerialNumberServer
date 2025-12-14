@@ -14,8 +14,7 @@
 #' SerialNumberSelectServer()
 SerialNumberSelectServer <- function(input,output,session, app_id, run_env = "PRD") {
   # 获取所有字段名
-  SerialNumber_all_columns <- reactive({
-    c(
+  SerialNumber_all_columns <- c(
       'Serial Number',
       'Production Date',
       'Sales OrderID',
@@ -27,10 +26,9 @@ SerialNumberSelectServer <- function(input,output,session, app_id, run_env = "PR
       'Delivery Date',
       'Total DeliveryQty'
     )
-  })
+
   #设置默认值
-  SerialNumber_default_columns <- reactive({
-    c(
+  SerialNumber_default_columns <- c(
       'Serial Number',
       'PN',
       'Product Name',
@@ -38,30 +36,18 @@ SerialNumberSelectServer <- function(input,output,session, app_id, run_env = "PR
       'Delivery Location',
       'Production Date'
     )
-  })
-  SerialNumber_reset_columns <- reactive({
-    c(
+  SerialNumber_reset_columns <- c(
       'Serial Number',
       'PN',
       'Product Name'
     )
-  })
-  # 更新字段选择器的选项
-  # 实际上需要取默认值
-  observe({
-    updatePickerInput(
-      session = session,
-      inputId = "SerialNumber_column_selector",
-      choices = SerialNumber_all_columns(),
-      selected = SerialNumber_default_columns()  #设置默认值
-    )
-  })
+
   # 全选按钮
   observeEvent(input$btn_SerialNumber_select_all, {
     updatePickerInput(
       session = session,
       inputId = "SerialNumber_column_selector",
-      selected = SerialNumber_all_columns()
+      selected = SerialNumber_all_columns
     )
   })
 
@@ -70,7 +56,7 @@ SerialNumberSelectServer <- function(input,output,session, app_id, run_env = "PR
     updatePickerInput(
       session = session,
       inputId = "SerialNumber_column_selector",
-      selected = SerialNumber_reset_columns()
+      selected = SerialNumber_reset_columns
     )
   })
   # 默认值按钮
@@ -78,7 +64,7 @@ SerialNumberSelectServer <- function(input,output,session, app_id, run_env = "PR
     updatePickerInput(
       session = session,
       inputId = "SerialNumber_column_selector",
-      selected = SerialNumber_default_columns()
+      selected = SerialNumber_default_columns
     )
   })
 
@@ -86,36 +72,37 @@ SerialNumberSelectServer <- function(input,output,session, app_id, run_env = "PR
   text_SerialNumber=tsui::var_text('text_SerialNumber')
 
   # 创建反应式数据
-  SerialNumber_data <- reactiveVal({
-    FSerialNumber=text_SerialNumber()
-    if(FSerialNumber==''){
-      tsui::pop_notice("Please Enter Serial Number")
-    }else{
-      erp_token = rdbepkg::dbConfig(FAppId = app_id, FType = "ERP", FRunEnv = run_env)
-      data = mdlVmSerialNumberPkg::SerialNumber_select(erp_token = erp_token,FSerialNumber =FSerialNumber )
-    }
-
-  })
+  # SerialNumber_data <- reactiveVal({
+  #   FSerialNumber=text_SerialNumber()
+  #   if(FSerialNumber==''){
+  #     tsui::pop_notice("Please Enter Serial Number")
+  #   }else{
+  #     erp_token = rdbepkg::dbConfig(FAppId = app_id, FType = "ERP", FRunEnv = run_env)
+  #     data = mdlVmSerialNumberPkg::SerialNumber_select(erp_token = erp_token,FSerialNumber =FSerialNumber )
+  #   }
+  #
+  # })
   #处理过程后的字段
-  SerialNumber_filtered_data <- reactive({
-    req(input$SerialNumber_column_selector)
-
-    SerialNumber_df <- SerialNumber_data()
-
-    # 确保至少选择一个字段
-    if (length(input$SerialNumber_column_selector) == 0) {
-      return(data.frame(Message = "Please Choose One Column at least!"))
-    }
-     # 选择指定的列
-    SerialNumber_selected_df <- SerialNumber_df[, input$SerialNumber_column_selector, drop = FALSE]
-  })
+  # SerialNumber_filtered_data <- reactive({
+  #   req(input$SerialNumber_column_selector)
+  #
+  #   SerialNumber_df <- SerialNumber_data()
+  #
+  #   # 确保至少选择一个字段
+  #   if (length(input$SerialNumber_column_selector) == 0) {
+  #     return(data.frame(Message = "Please Choose One Column at least!"))
+  #   }
+  #    # 选择指定的列
+  #   SerialNumber_selected_df <- SerialNumber_df[, input$SerialNumber_column_selector, drop = FALSE]
+  # })
 
 
   #查询按钮
 
   shiny::observeEvent(input$btn_SerialNumber_view,{
 
-    req(SerialNumber_filtered_data())
+    #req(SerialNumber_filtered_data())
+    req(input$SerialNumber_column_selector)
 
 
     if(FSerialNumber==''){
@@ -124,10 +111,15 @@ SerialNumberSelectServer <- function(input,output,session, app_id, run_env = "PR
 
 
     }else{
+      erp_token = rdbepkg::dbConfig(FAppId = app_id, FType = "ERP", FRunEnv = run_env)
+      data = mdlVmSerialNumberPkg::SerialNumber_select(erp_token = erp_token,FSerialNumber =FSerialNumber )
+      print(data)
+      data_selected = data[ ,input$SerialNumber_column_selector,drop=FALSE]
 
-      tsui::run_dataTable2(id ='SerialNumber_resultView' ,data =SerialNumber_filtered_data(),lang = 'en' )
 
-      tsui::run_download_xlsx(id = 'dl_SerialNumber',data = SerialNumber_filtered_data(),filename = 'SerialNumber.xlsx')
+      tsui::run_dataTable2(id ='SerialNumber_resultView' ,data =data_selected,lang = 'en' )
+
+      tsui::run_download_xlsx(id = 'dl_SerialNumber',data = data_selected,filename = 'SerialNumber.xlsx')
 
 
     }
