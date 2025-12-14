@@ -1,7 +1,7 @@
 Package: mdlVmSerialNumberServer
 Type: Package
 Title: Server Package For DMS mdlVmSerialNumber Module in R
-Version: 1.0.4
+Version: 1.0.5
 Author: hulilei
 Maintainer: hulilei <hulilei@takewiki.com.cn>
 Description: More about what it does (maybe more than one line)

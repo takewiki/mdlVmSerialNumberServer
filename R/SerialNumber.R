@@ -102,7 +102,7 @@ SerialNumberSelectServer <- function(input,output,session, app_id, run_env = "PR
   shiny::observeEvent(input$btn_SerialNumber_view,{
 
     #req(SerialNumber_filtered_data())
-    req(input$SerialNumber_column_selector)
+    #req(input$SerialNumber_column_selector)
 
 
     if(FSerialNumber==''){
@@ -111,6 +111,7 @@ SerialNumberSelectServer <- function(input,output,session, app_id, run_env = "PR
 
 
     }else{
+      FSerialNumber=text_SerialNumber()
       erp_token = rdbepkg::dbConfig(FAppId = app_id, FType = "ERP", FRunEnv = run_env)
       data = mdlVmSerialNumberPkg::SerialNumber_select(erp_token = erp_token,FSerialNumber =FSerialNumber )
       print(data)
