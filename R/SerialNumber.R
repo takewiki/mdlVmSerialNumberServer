@@ -32,7 +32,7 @@ SerialNumberSelectServer <- function(input,output,session, app_id, run_env = "PR
     }else{
       erp_token = rdbepkg::dbConfig(FAppId = app_id, FType = "ERP", FRunEnv = run_env)
       data = mdlVmSerialNumberPkg::SerialNumber_select(erp_token = erp_token,FSerialNumber =FSerialNumber )
-      tsui::run_dataTable2(id ='SerialNumber_resultView' ,data =data )
+      tsui::run_dataTable2(id ='SerialNumber_resultView' ,data =data,lang = 'en' )
 
       tsui::run_download_xlsx(id = 'dl_SerialNumber',data = data,filename = 'SerialNumber.xlsx')
 
