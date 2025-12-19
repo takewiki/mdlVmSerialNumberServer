@@ -19,12 +19,12 @@ SerialNumberSelectServer <- function(input,output,session, app_id, run_env = "PR
       'Production Date',
       'Sales OrderID',
       'Delivery Location',
-      'Sales OrderID2',
+     # 'Sales OrderID2',
       'PN',
       'Product Name',
-      'Sales OrderQty',
-      'Delivery Date',
-      'Total DeliveryQty'
+    #  'Sales OrderQty',
+      'Delivery Date'
+      #'Total DeliveryQty'
     )
 
   #设置默认值
@@ -129,7 +129,9 @@ SerialNumberSelectServer <- function(input,output,session, app_id, run_env = "PR
 
       tsui::run_dataTable2(id ='SerialNumber_resultView' ,data =data_selected,lang = 'en' )
 
-      tsui::run_download_xlsx(id = 'dl_SerialNumber',data = data_selected,filename = 'SerialNumber.xlsx')
+      filename=paste('SerialNumber-',Sys.Date(),'.xlsx')
+
+      tsui::run_download_xlsx(id = 'dl_SerialNumber',data = data_selected,filename = filename)
 
 
     }
