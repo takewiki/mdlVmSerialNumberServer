@@ -15,26 +15,23 @@
 SerialNumberSelectServer <- function(input,output,session, app_id, run_env = "PRD") {
   # 获取所有字段名
   SerialNumber_all_columns <- c(
-      'Serial Number',
-      'Production Date',
-      'Sales OrderID',
-      'Delivery Location',
-     # 'Sales OrderID2',
-      'PN',
-      'Product Name',
-    #  'Sales OrderQty',
-      'Delivery Date'
-      #'Total DeliveryQty'
+    'Serial Number',
+    'Sales OrderID',
+    'PN',
+    'Product Name',
+    'Production Date',
+    'Delivery Location',
+    'Delivery Date'
     )
 
   #设置默认值
   SerialNumber_default_columns <- c(
-      'Serial Number',
-      'PN',
-      'Product Name',
-      'Sales OrderID',
-      'Delivery Location',
-      'Production Date'
+    'Serial Number',
+    'Sales OrderID',
+    'PN',
+    'Product Name',
+    'Production Date',
+    'Delivery Location'
     )
   SerialNumber_reset_columns <- c(
       'Serial Number',
