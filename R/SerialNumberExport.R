@@ -241,6 +241,9 @@ SerialNumberExport_build <- function(rows) {
 #' SerialNumberExportServer()
 SerialNumberExportServer <- function(input, output, session, app_id, run_env = "PRD") {
 
+  # 启动日志：确认运行的是新版代码
+  message("[mdlVmSerialNumberServer] SerialNumberExportServer loaded (v1.1.0)")
+
   # caller environment, used to look for erp_token when dbConfig cannot build one
   token_env <- parent.frame()
 
@@ -281,36 +284,6 @@ SerialNumberExportServer <- function(input, output, session, app_id, run_env = "
     i <- row_seq() + 1L
     row_seq(i)
     sprintf("sne_%03d", i)
-  }
-
-  row_ui <- function(id, initial = list()) {
-    f0 <- initial$field %||% filter_fields$label[1]
-    if (!f0 %in% filter_fields$label) f0 <- filter_fields$label[1]
-    lp0 <- initial$lparen %||% ""
-    if (!lp0 %in% c("", "(", "((")) lp0 <- ""
-    rp0 <- initial$rparen %||% ""
-    if (!rp0 %in% c("", ")", "))")) rp0 <- ""
-    lg0 <- initial$logic %||% "AND"
-    if (!lg0 %in% c("AND", "OR")) lg0 <- "AND"
-    onclick <- sprintf("Shiny.setInputValue('SerialNumberExport_filter_active','%s',{priority:'event'});document.querySelectorAll('.dlf-row').forEach(function(e){e.classList.remove('is-active');});this.classList.add('is-active');", id)
-    shiny::div(
-      id = id, class = "dlf-row", onclick = onclick,
-      shiny::selectInput(paste0(id, "__lp"), NULL,
-                         choices = c("-" = "", "(" = "(", "((" = "(("),
-                         selected = lp0, selectize = FALSE, width = "70px"),
-      shiny::selectInput(paste0(id, "__field"), NULL,
-                         choices = filter_fields$label,
-                         selected = f0, selectize = FALSE, width = "162px"),
-      shiny::uiOutput(paste0(id, "__op_ui")),
-      shiny::uiOutput(paste0(id, "__val_ui")),
-      shiny::selectInput(paste0(id, "__rp"), NULL,
-                         choices = c("-" = "", ")" = ")", "))" = "))"),
-                         selected = rp0, selectize = FALSE, width = "70px"),
-      shiny::selectInput(paste0(id, "__logic"), NULL,
-                         choices = c("AND" = "AND", "OR" = "OR"),
-                         selected = lg0, selectize = FALSE, width = "100px"),
-      shiny::actionButton(paste0(id, "__del"), "", icon = shiny::icon("minus"))
-    )
   }
 
   register_row <- function(id, initial = list()) {
@@ -370,21 +343,26 @@ SerialNumberExportServer <- function(input, output, session, app_id, run_env = "
     })
   }
 
+  # 给某一行的删除按钮挂上处理（静态首行和动态行共用）
+  bind_row <- function(id) {
+    shiny::observeEvent(input[[paste0(id, "__del")]], {
+      remove_row(id)
+    }, ignoreInit = TRUE, once = TRUE)
+  }
+
   add_row <- function(initial = NULL, after = NULL) {
     initial <- initial %||% list()
     id <- new_row_id()
     ids <- row_ids()
     if (is.null(after) || !after %in% ids) {
-      shiny::insertUI("#SerialNumberExport_filter_rows", where = "beforeEnd", ui = row_ui(id, initial))
+      shiny::insertUI("#SerialNumberExport_filter_rows", where = "beforeEnd", ui = mdlVmSerialNumberUI::SerialNumberExport_row_ui(id, initial))
       row_ids(c(ids, id))
     } else {
-      shiny::insertUI(paste0("#", after), where = "afterEnd", ui = row_ui(id, initial))
+      shiny::insertUI(paste0("#", after), where = "afterEnd", ui = mdlVmSerialNumberUI::SerialNumberExport_row_ui(id, initial))
       row_ids(append(ids, id, after = match(after, ids)))
     }
     register_row(id, initial)
-    shiny::observeEvent(input[[paste0(id, "__del")]], {
-      remove_row(id)
-    }, ignoreInit = TRUE, once = TRUE)
+    bind_row(id)
     active_row(id)
     invisible(id)
   }
@@ -466,9 +444,13 @@ SerialNumberExportServer <- function(input, output, session, app_id, run_env = "
     }
   }, ignoreInit = TRUE)
 
-  session$onFlushed(function() {
-    shiny::isolate(add_row())
-  }, once = TRUE)
+  # 首行由 UI 直接渲染（保证一进页面就看到一行），这里接管它的输出
+  first_row <- "sne_001"
+  row_ids(first_row)
+  row_seq(1L)
+  register_row(first_row)
+  bind_row(first_row)
+  active_row(first_row)
 
   # ---------------- Search: build the WHERE and run it in the database ----------------
   shiny::observeEvent(input$btn_SerialNumberExport_view, {
@@ -477,8 +459,10 @@ SerialNumberExportServer <- function(input, output, session, app_id, run_env = "
       tsui::pop_notice(b$error)
       return(invisible(NULL))
     }
+    # 空行或没填完的行直接跳过，只给一条自动消失的提示
     if (length(b$skipped)) {
-      tsui::pop_notice(sprintf("%d incomplete row(s) ignored", length(b$skipped)))
+      shiny::showNotification(sprintf("%d incomplete row(s) ignored", length(b$skipped)),
+                              type = "message", duration = 3)
     }
 
     erp_token <- SerialNumberExport_token(app_id = app_id, run_env = run_env, caller_env = token_env)
